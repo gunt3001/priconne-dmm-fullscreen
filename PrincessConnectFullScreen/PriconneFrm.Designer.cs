@@ -32,6 +32,9 @@
             this.fullscreenBtn = new System.Windows.Forms.Button();
             this.restoreBtn = new System.Windows.Forms.Button();
             this.linkBtn = new System.Windows.Forms.LinkLabel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.resolutionComboBox = new System.Windows.Forms.ComboBox();
+            this.applyResolutionBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // fullscreenBtn
@@ -57,7 +60,7 @@
             // linkBtn
             // 
             this.linkBtn.AutoSize = true;
-            this.linkBtn.Location = new System.Drawing.Point(10, 61);
+            this.linkBtn.Location = new System.Drawing.Point(7, 105);
             this.linkBtn.Name = "linkBtn";
             this.linkBtn.Size = new System.Drawing.Size(341, 13);
             this.linkBtn.TabIndex = 2;
@@ -65,11 +68,42 @@
             this.linkBtn.Text = "Princess Connect Re:Dive (DMM) Full Screen tool by Takumi Producer";
             this.linkBtn.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkBtn_LinkClicked);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 68);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(76, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Set Resolution";
+            // 
+            // resolutionComboBox
+            // 
+            this.resolutionComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.resolutionComboBox.FormattingEnabled = true;
+            this.resolutionComboBox.Location = new System.Drawing.Point(94, 65);
+            this.resolutionComboBox.Name = "resolutionComboBox";
+            this.resolutionComboBox.Size = new System.Drawing.Size(167, 21);
+            this.resolutionComboBox.TabIndex = 4;
+            // 
+            // applyResolutionBtn
+            // 
+            this.applyResolutionBtn.Location = new System.Drawing.Point(267, 57);
+            this.applyResolutionBtn.Name = "applyResolutionBtn";
+            this.applyResolutionBtn.Size = new System.Drawing.Size(75, 35);
+            this.applyResolutionBtn.TabIndex = 5;
+            this.applyResolutionBtn.Text = "Apply";
+            this.applyResolutionBtn.UseVisualStyleBackColor = true;
+            this.applyResolutionBtn.Click += new System.EventHandler(this.applyResolutionBtn_Click);
+            // 
             // PrinconneFrm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(358, 83);
+            this.ClientSize = new System.Drawing.Size(358, 134);
+            this.Controls.Add(this.applyResolutionBtn);
+            this.Controls.Add(this.resolutionComboBox);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.linkBtn);
             this.Controls.Add(this.restoreBtn);
             this.Controls.Add(this.fullscreenBtn);
@@ -90,6 +124,9 @@
         private System.Windows.Forms.Button fullscreenBtn;
         private System.Windows.Forms.Button restoreBtn;
         private System.Windows.Forms.LinkLabel linkBtn;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox resolutionComboBox;
+        private System.Windows.Forms.Button applyResolutionBtn;
     }
 }
 

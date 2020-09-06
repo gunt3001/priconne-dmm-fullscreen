@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -9,48 +12,9 @@ namespace Hwnd
         public PrinconneFrm()
         {
             InitializeComponent();
-        }
-
-        [DllImport("user32.dll")]
-        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-        [DllImport("user32.dll")]
-        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-        public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
-
-
-        private const int SWP_NOSIZE = 0x0001;
-        private const int SWP_NOZORDER = 0x0004;
-        private const int SWP_SHOWWINDOW = 0x0040;
-        private const int WS_BORDER = 0x00800000;
-        private const int WS_DLGFRAME = 0x00400000;
-        private const int WS_CAPTION = WS_BORDER | WS_DLGFRAME;
-        private const int WS_MINIMIZE = 0x20000000;
-        private const int WS_MAXIMIZE = 0x1000000;
-        private const int WS_SYSMENU = 0x80000;
-
-
-        private const int SW_MAXIMIZE = 3;
-        private const int SW_RESTORE = 9;
-        enum WindowLongFlags : int
-        {
-            GWL_EXSTYLE = -20,
-            GWLP_HINSTANCE = -6,
-            GWLP_HWNDPARENT = -8,
-            GWL_ID = -12,
-            GWL_STYLE = -16,
-            GWL_USERDATA = -21,
-            GWL_WNDPROC = -4,
-            DWLP_USER = 0x8,
-            DWLP_MSGRESULT = 0x0,
-            DWLP_DLGPROC = 0x4
+            resolutionComboBox.DataSource = ResolutionData;
+            resolutionComboBox.DisplayMember = "displayName";
+            resolutionComboBox.ValueMember = "resolution";
         }
 
         private const string PRICONNE_WND_CLASS = "UnityWndClass";
@@ -65,6 +29,22 @@ namespace Hwnd
         private const string MSG_TITLE_ALREADY_WINDOW = "Window Mode";
         private const string MSG_MESSAGE_ALREADY_WINDOW = "Priconne already in window mode";
 
+        private Win32Wrapper Win32Wrapper { get; set; } = new Win32Wrapper();
+
+        private static readonly Size[] AvailableResolutions = {
+            new Size(1024, 576),
+            new Size(1280, 720),
+            new Size(1366, 768),
+            new Size(1600, 900),
+            new Size(1920, 1080),
+            new Size(2560, 1440),
+        };
+
+        private IEnumerable<object> ResolutionData => AvailableResolutions.Select(x => new
+        {
+            resolution = x,
+            displayName = $"{x.Width}x{x.Height}",
+        }).ToList();
 
         private void linkBtn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -73,52 +53,45 @@ namespace Hwnd
 
         private void fullscreenBtn_Click(object sender, EventArgs e)
         {
-            IntPtr princoneHwnd = FindWindow(PRICONNE_WND_CLASS, PRICONNE_WND_NAME);
-            if(((int)princoneHwnd) == 0)
+            var princoneHwnd = Win32Wrapper.GetWindowHandle(PRICONNE_WND_CLASS, PRICONNE_WND_NAME);
+            if ((int)princoneHwnd == 0)
             {
                 MessageBox.Show(MSG_MESSAGE_START_GAME_FIST, MSG_TITLE_START_GAME_FIRST, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            IntPtr winLong = GetWindowLong(princoneHwnd, (int)WindowLongFlags.GWL_STYLE);
 
-            int newStyle = (int)winLong;
-
-            
-
-            if ((((int)winLong) & WS_DLGFRAME) == 0)
+            if (Win32Wrapper.CheckWindowIsFullScreen(princoneHwnd))
             {
                 MessageBox.Show(MSG_MESSAGE_ALREADY_FULLSCREEN, MSG_TITLE_ALREADY_FULLSCREEN, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            newStyle &= ~(WS_DLGFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
-
-            SetWindowLong(princoneHwnd, (int)WindowLongFlags.GWL_STYLE, (int)newStyle);
-            ShowWindow(princoneHwnd, SW_MAXIMIZE);
+            Win32Wrapper.FullScreenWindow(princoneHwnd);
         }
 
         private void restoreBtn_Click(object sender, EventArgs e)
         {
-            IntPtr priconHwnd = FindWindow(PRICONNE_WND_CLASS, PRICONNE_WND_NAME);
-
-            if (((int)priconHwnd) == 0)
+            var princoneHwnd = Win32Wrapper.GetWindowHandle(PRICONNE_WND_CLASS, PRICONNE_WND_NAME);
+            if ((int)princoneHwnd == 0)
             {
                 MessageBox.Show(MSG_MESSAGE_START_GAME_FIST, MSG_TITLE_START_GAME_FIRST, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            IntPtr winLong = GetWindowLong(priconHwnd, (int)WindowLongFlags.GWL_STYLE);
-
-            int newStyle = (int)winLong;
-
-
-            newStyle |= (WS_DLGFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
-
-            SetWindowLong(priconHwnd, (int)WindowLongFlags.GWL_STYLE, (int)newStyle);
-            ShowWindow(priconHwnd, SW_RESTORE);
-            SetWindowPos(priconHwnd, 0, 0, 0, 960, 570, SWP_NOZORDER | SWP_SHOWWINDOW);
-
+            Win32Wrapper.RestoreWindow(princoneHwnd);
         }
 
+        private void applyResolutionBtn_Click(object sender, EventArgs e)
+        {
+            var princoneHwnd = Win32Wrapper.GetWindowHandle(PRICONNE_WND_CLASS, PRICONNE_WND_NAME);
+            if ((int)princoneHwnd == 0)
+            {
+                MessageBox.Show(MSG_MESSAGE_START_GAME_FIST, MSG_TITLE_START_GAME_FIRST, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!(resolutionComboBox.SelectedValue is Size newResolution)) return;
+            Win32Wrapper.ResizeWindow(princoneHwnd, newResolution.Width, newResolution.Height);
+        }
     }
 }
